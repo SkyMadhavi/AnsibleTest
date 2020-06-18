@@ -1,5 +1,5 @@
 ---
 - hosts: localhost
   tasks:
-    - name: Print message {{environment}}
+    - name: Print {{name}} message {{environment}}
       debug: msg="Hello from Ansible AAAA!!"
