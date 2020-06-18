@@ -2,4 +2,4 @@
 - hosts: localhost
   tasks:
     - name: Print {{name}} message {{environment}}
-      debug: msg="Hello from Ansible AAAA!!"
+      debug: msg="Hello from Ansible AAAA --- {{name}} message {{environment}} !!"
