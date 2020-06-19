@@ -1,5 +1,52 @@
----
-- hosts: localhost
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+  vars:
+    - packages: ["git", "nmap"]
+      source : https://github.com/jenkinsci/ansible-plugin.git
+      buildfile : eWayBill.tgz
+      deploydir : /Applications/MAMP/htdocs/Ansible/ansible-test/eway1/
+      machineuser : centos
+      machineip : 13.127.213.231
+      envi: "eway1"
+      var1: hola
+      var2: "{{ 'foo' if var1 else '' }}"
+      #var2: "{{ 'foo' if var1 == 'hola' else '' }}"
   tasks:
-    - name: Print {{name}} message {{environment}}
-      debug: msg="Hello from Ansible AAAA --- {{name}} message {{environment}} !!"
+    - name: debug var1
+      debug:
+        var: var1
+    - name: debug var2
+      debug:
+        var: var2
+     #check whether param1 defined
+    - name: 'Set Variables'
+      debug:
+        msg:
+          - "source = {{ source }}"
+          - "buildfile = {{ buildfile }}"
+          - "deploydir = {{ deploydir }}"
+          - "machineuser = {{ machineuser }}"
+          - "machineip = {{ machineip }}"
+    - set_fact: foo=true
+    - name: do something when 'bar' tag is defined
+      debug: var=foo
+      when: foo
+    - set_fact: is_deployed=false
+    # E-Way Bill Server 1
+    - name: Clone Repository | E-Way Bill Server 1 | repo = {{ source }} | dest = {{ deploydir }}
+      git: repo={{ source }}
+           dest={{ deploydir }}
+           accept_hostkey=yes
+           force=yes
+           recursive=no
+           version=master
+      when: (envi =="eway1" and deploydir is defined)
+    - name: Copy ipconfig file in project
+      command: sudo cp "{{ deploydir }}../ipconfig.php" "{{ deploydir }}ipconfig.php"
+    # Install Packages   
+    - name: Install Composer Packages
+      shell: composer install
+      args:
+        chdir: "{{ deploydir }}"
+      when: is_deployed
